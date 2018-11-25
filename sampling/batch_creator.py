@@ -1,9 +1,8 @@
 class BatchCreator():
-  self.data_store = None
-  self.batch_size = 0
 
   def __init__(self, data_store, batch_size):
-    pass
+    self.data_store = data_store
+    self.batch_size = batch_size
 
   def create_batches(self):
     """

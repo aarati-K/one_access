@@ -4,25 +4,26 @@ class DataStore():
   """
     Base class for all store creators for different datasets
   """
-  self.transforms = []
-  self.dataset_name = ""
-  self.dataset_dir = ""
-  self.num_points = 0
-
-  # Initial samples pinned to heap memory, passed by the main process
-  self.samples = None
-  self.max_samples = 0
-
-  # To be populated by the batch creator
-  self.batches = None
-  self.max_batches = 0
 
   def __init__(self,
-    dataset_dir,
-    transforms=[],
-    download=False
+      dataset_dir,
+      transforms=[],
+      download=False
     ):
     self.transforms = transforms
+    self.transforms = []
+    
+    self.dataset_name = ""
+    self.dataset_dir = ""
+    self.num_points = 0
+
+    # Initial samples pinned to heap memory, passed by the main process
+    self.samples = None
+    self.max_samples = 0
+
+    # To be populated by the batch creator
+    self.batches = None
+    self.max_batches = 0
 
   def count_num_points(self):
     # Go through the dataset_dir and count number of points

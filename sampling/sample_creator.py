@@ -3,11 +3,10 @@ class SampleCreator():
     Responsible for starting multile reservoir samples across
     the memory hierarchy
   """
-  self.data_store = None
-  self.target_location = ""
 
-  def __init__(self):
-    pass
+  def __init__(self, data_store):
+    self.data_store = data_store
+    self.target_location = ""
 
   def create_samples(self):
     """
@@ -15,6 +14,7 @@ class SampleCreator():
     """
     # Generate keys using reservoir sampling with num_points in 
     # the metadata file.
+    
     # Read the keys from one level below the hierarchy,
     # and save the samples to the target location.
     pass
