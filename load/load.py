@@ -15,7 +15,7 @@ class DataLoader():
     # based on the memory config
     pass
 
-  def next(self):
+  def get_next_batch(self):
     """
      Get the next batch from the queue
     """
