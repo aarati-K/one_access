@@ -24,12 +24,12 @@ class DataStore():
     ):
     self.transforms = transforms
 
-  def countNumPoints(self):
+  def count_num_points(self):
     # Go through the dataset_dir and count number of points
     # Write num_points to the metadata file (in generateIR)
     pass
 
-  def generateIR(self):
+  def generate_IR(self):
     """
       Generates multiple files with (k, v) pairs stored sequentially
       with transforms applied. Generate the metadata file.
@@ -44,7 +44,7 @@ class DataStore():
         # - Specify file names, and how many <K, V> pairs each has
     pass
 
-  def generateSamples(self):
+  def generate_samples(self):
     """
       Create a SampleCreator object and create multiple samples
     """
