@@ -20,8 +20,6 @@ class DataLoader():
     
     # Start batch_creator(s)
     
-    # based on the memory config
-    
 
   def get_next_batch(self):
     """
