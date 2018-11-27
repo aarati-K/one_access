@@ -2,6 +2,9 @@ import PIL
 from sampling.sample import Sample
 from multiprocessing import Queue
 
+class Metadata():
+  def __init__(self):
+    pass
 
 class DataStore():
   """
