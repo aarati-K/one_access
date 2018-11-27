@@ -6,6 +6,8 @@ class SampleCreator(Process):
   """
     Responsible for starting multile reservoir samples across
     the memory hierarchy
+    
+    Design reference: https://stackoverflow.com/questions/17172878/using-pythons-multiprocessing-process-class
   """
 
   def __init__(self, data_store):
