@@ -14,37 +14,39 @@ class SampleCreator(Process):
     super(P, self).__init__()
     self.ds = data_store
     self.num_points = self.ds.num_points
+    self.sample_size = self.ds.sample_size
 
   def run(self):
     """
       Keep creating samples in the background.
     """
     while True:
-      reservoir = Sample(self.ds.sample_size)
-
       i = 0
-      while i < reservoir.maxsize and i < self.num_points:
+      point = 0
+      points = []
+      while i < self.sample_size and i < self.num_points:
         point = self.get_next_point()
-        reservoir.items.append(point)
+        points.append((i, point))
         i += 1
-        
-      point = reservoir.maxsize
-      points_to_fill = []
-      while i >= reservoir.maxsize and i < self.num_points:
         point += 1
-        s = random.randint(0, reservoir.maxsize + i)
+        
+      while i >= self.sample_size and i < self.num_points:
+        m = self.sample_size
+        s = random.randint(0, self.sample_size + i)
         if s < m:
-          points_to_fill.append((m, point))
+          points.append((m, point))
         i += 1
+        point += 1
       
-      fill_reservoir_with_points(reservoir, points_to_fill)
+      reservoir = build_reservoir(points, self.sample_size)
 
       # Blocks if max number of samples met
       # TODO: Only for memory sampling rn, add SSD/Disk support later
       self.ds.samples.put(reservoir)
     
-  def fill_reservoir_with_points(self, reservoir, points):
+  def build_reservoir(self, points, sample_size):
     """ Get next blob into memory, read points from it, and then move on to
       next blob from ir location. """
-    # TODO:
-    pass
+    reservoir = Sample(sample_size)
+    # TODO: Fill reservoir
+    return reservoir
