@@ -1,4 +1,7 @@
 import PIL
+from sampling.sample import Sample
+from multiprocessing import Queue
+
 
 class DataStore():
   """
@@ -8,18 +11,22 @@ class DataStore():
   def __init__(self,
       dataset_dir,
       transforms=[],
-      download=False
+      download=False,
+      max_samples=1,
+      sample_size=100
     ):
     self.transforms = transforms
     self.transforms = []
     
     self.dataset_name = ""
     self.dataset_dir = ""
+    self.metadata_filepath = ""
+    self.metadata = None
     self.num_points = 0
 
     # Initial samples pinned to heap memory, passed by the main process
-    self.samples = None
-    self.max_samples = 0
+    self.samples = Queue(max_samples)
+    self.sample_size = sample_size
 
     # To be populated by the batch creator
     self.batches = None
@@ -41,8 +48,9 @@ class DataStore():
     # Decide on number of files
     # Store the file with contiguous <K, V> pairs
     # Create metadata file
-        # - Specify key size, value size
-        # - Specify file names, and how many <K, V> pairs each has
+      # - Specify key size, value size
+      # - Specify file names, and how many <K, V> pairs each has
+      # - Set self.metadata field
     pass
 
   def generate_samples(self):
