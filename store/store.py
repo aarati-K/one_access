@@ -1,6 +1,7 @@
 import PIL
 from sampling.sample import Sample
-from multiprocessing import Queue
+from torch.multiprocessing import Process
+
 
 class Metadata():
   def __init__(self):
