@@ -25,7 +25,6 @@ class SampleCreator(Process):
       point = 0
       points = []
       while i < self.sample_size and i < self.num_points:
-        point = self.get_next_point()
         points.append((i, point))
         i += 1
         point += 1
