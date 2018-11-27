@@ -22,6 +22,7 @@ class SampleCreator(Process):
     while True:
       reservoir = Sample(self.ds.sample_size)
 
+      i = 0
       while i < reservoir.maxsize and i < self.md.num_points:
         point = self.get_next_point()
         reservoir.items.append(point)
