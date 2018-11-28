@@ -8,8 +8,7 @@ class BatchCreator():
     """
       Keep creating batches in the background
     """
-    # Read the samples on memory (data_store.samples) and
-    # generate batches.
+    # Read the samples on memory (data_store.samples) and generate batches.
     # Place the batches in data_store.batches.
-    # Pause if data_store.batches is full.
+    # Pause if data_store.batches is full (or if data_store.samples empty)
     pass

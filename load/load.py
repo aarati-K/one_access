@@ -1,4 +1,5 @@
 import torch.multiprocessing as mp
+from sampling.sample_creator import SampleCreator
 
 
 class DataLoader():
@@ -12,8 +13,13 @@ class DataLoader():
     self.data_store = data_store
     self.batch_size = batch_size
     # Mark data_store as shared memory
-    # Start separate processes for batch_creator and sample_creator(s),
-    # based on the memory config
+    
+    # Start separate processes for sample_creator(s)
+    sc = SampleCreator(self.data_store, 0)
+    sc.start()
+    
+    # Start batch_creator(s)
+    
 
   def get_next_batch(self):
     """
@@ -22,3 +28,4 @@ class DataLoader():
     # Access batches from data_store.batches and return the batch
     # delete the used batch
     pass
+    
