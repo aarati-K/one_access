@@ -1,5 +1,6 @@
-import PIL
 import os
+import PIL
+from .memory_hierarchy import MemoryHierarchy
 from sampling.sample import Sample
 from torch.multiprocessing import Process
 
@@ -13,19 +14,12 @@ class DataStore():
       Base class for all store creators for different datasets
     """
 
-    def __init__(self,
-                 dataset_dir,
-                 max_batches,
-                 transforms=[],
-                 download=False,
-                 max_samples=1,
-                 sample_size=100
-                 ):
+    def __init__(self, dataset_dir, max_batches, transforms=[], download=False, max_samples=1, sample_size=100):
         self.transforms = transforms
         self.transforms = []
 
         self.dataset_name = ""
-
+        self.mem_config = None
         self.dataset_dir = dataset_dir
         self.metadata_filepath = ""
         self.metadata = None
@@ -62,6 +56,11 @@ class DataStore():
         # - Specify key size, value size
         # - Specify file names, and how many <K, V> pairs each has
         # - Set self.metadata field
+
+
+
+
+
         pass
 
     def generate_samples(self):
@@ -76,5 +75,7 @@ class DataStore():
         """
           Calls generateIR and generateSamples
         """
-        self.generate_IR()
-        self.generate_samples()
+        MemoryHierarchy.load()
+        self.mem_config = MemoryHierarchy.get_config()
+        generate_IR()
+        generate_samples()
