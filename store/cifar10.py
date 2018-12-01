@@ -13,7 +13,8 @@ class Cifar10(DataStore):
         self.dataset_name = "Cifar-10"
 
     def count_num_points(self):
-        self.num_points = 50000
+        self.num_train_points = 50000
+        self.num_test_points = 10000
 
     def generate_IR(self):
         data_file_path = self.mem_config.get(StorageComponents.HDD).get(StorageAttributes.ONE_ACCESS_DIR)+'/data/'

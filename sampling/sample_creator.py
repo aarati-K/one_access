@@ -15,7 +15,7 @@ class SampleCreator(Process):
   def __init__(self, data_store):
     super(P, self).__init__()
     self.ds = data_store
-    self.num_points = self.ds.num_points
+    self.num_train_points = self.ds.num_train_points
     self.sample_size = self.ds.sample_size
 
   def run(self):
@@ -26,12 +26,12 @@ class SampleCreator(Process):
       i = 0
       point = 0
       points = []
-      while i < self.sample_size and i < self.num_points:
+      while i < self.sample_size and i < self.num_train_points:
         points.append((i, point))
         i += 1
         point += 1
         
-      while i >= self.sample_size and i < self.num_points:
+      while i >= self.sample_size and i < self.num_train_points:
         m = self.sample_size
         s = random.randint(0, self.sample_size + i)
         if s < m:

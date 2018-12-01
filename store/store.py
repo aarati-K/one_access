@@ -24,11 +24,13 @@ class DataStore():
         self.mem_config = None
         self.dataset_dir = dataset_dir
         self.metadata = None
-        self.num_points = 0
+        self.num_train_points = 0
+        self.num_test_points = 0
 
         self.max_samples = max_samples
         self.sample_size = sample_size
-        # Initial samples pinned to heap memory, passed by the main process
+        # Samples pinned to heap memory, shared with the batch creator and
+        # sample creator processes
         self.samples = Queue(max_samples)
 
         self.max_batches = max_batches
@@ -37,14 +39,15 @@ class DataStore():
         self.batches = Queue(max_batches)
 
     def count_num_points(self):
-        # Use this implementation for default format of subdirectory classes(Images) else override
+        # Use this implementation for default format of subdirectory classes
+        # (typically for image datasets), else override.
         # Go through the dataset_dir and count number of points
-        # Write num_points to the metadata file (in generateIR)
-        num_points = 0
+        num_train_points = 0
         for root, subdirs, files in os.walk(self.dataset_dir):
             for file in files:
-                num_points += 1
-        self.num_points = num_points
+                num_train_points += 1
+        self.num_train_points = num_train_points
+        # TODO: Add logic for counting num_test_points
 
     def generate_IR(self):
         """
