@@ -1,6 +1,8 @@
 from torch.multiprocessing import Process
 import random
 
+from sample import Sample
+
 
 class SampleCreator(Process):
   """

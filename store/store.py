@@ -1,7 +1,7 @@
 import os
 import PIL
-from memory_hierarchy import MemoryHierarchy
 from sampling.sample import Sample
+from memory_hierarchy import MemoryHierarchy
 from torch.multiprocessing import Process, Queue
 
 
@@ -15,8 +15,10 @@ class DataStore():
       Base class for all store creators for different datasets
     """
 
-    def __init__(self, dataset_dir, max_batches, transforms=[], max_samples=1, sample_size=100, batch_size=128):
-        self.transforms = transforms
+    def __init__(self, dataset_dir, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
+                 batch_size=128):
+        self.transform = transform
+        self.target_transform = target_transform
 
         self.dataset_name = ""
         self.mem_config = None
