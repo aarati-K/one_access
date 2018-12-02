@@ -1,7 +1,7 @@
 import os
 import PIL
 from sampling.sample import Sample
-from memory_hierarchy import MemoryHierarchy
+from store.memory_hierarchy import MemoryHierarchy
 from torch.multiprocessing import Process, Queue
 
 
@@ -14,9 +14,13 @@ class DataStore():
     """
       Base class for all store creators for different datasets
     """
+    # relative path names of train and test folders
+    TRAIN_FOLDER = "/train"
+    TEST_FOLDER = "/test"
+    DATA_FILE = "data_{}.npy"
 
     def __init__(self, dataset_dir, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
-                 batch_size=128):
+                 batch_size=128, delete_existing=False):
         self.transform = transform
         self.target_transform = target_transform
 
@@ -26,6 +30,7 @@ class DataStore():
         self.metadata = None
         self.num_train_points = 0
         self.num_test_points = 0
+        self.delete_existing = delete_existing
 
         self.max_samples = max_samples
         self.sample_size = sample_size
