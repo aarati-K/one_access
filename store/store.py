@@ -21,12 +21,14 @@ class DataStore():
 
     def __init__(self, dataset_dir, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
                  batch_size=128, delete_existing=False):
+        self.dataset_name = ""
         self.transform = transform
         self.target_transform = target_transform
 
-        self.dataset_name = ""
-        self.mem_config = None
+        # The input dataset, from which IR is generated
         self.dataset_dir = dataset_dir
+
+        self.mem_config = None
         self.metadata = None
         self.num_train_points = 0
         self.num_test_points = 0
@@ -68,6 +70,12 @@ class DataStore():
         # - Specify key size, value size
         # - Specify file names, and how many <K, V> pairs each has
         # - Set self.metadata field
+        pass
+
+    def get_data_folder_path(self):
+        """
+            Return the folder containing the data in intermediate rep (IR)
+        """
         pass
 
     def generate_samples(self):
