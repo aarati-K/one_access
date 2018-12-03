@@ -19,14 +19,14 @@ class DataStore():
     TEST_FOLDER = "/test"
     DATA_FILE = "data_{}.npy"
 
-    def __init__(self, dataset_dir, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
+    def __init__(self, input_data_folder, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
                  batch_size=128, delete_existing=False):
         self.dataset_name = ""
         self.transform = transform
         self.target_transform = target_transform
 
-        # The input dataset, from which IR is generated
-        self.dataset_dir = dataset_dir
+        # The folder containing the input data, from which IR is generated
+        self.input_data_folder = input_data_folder
 
         self.mem_config = None
         self.metadata = None
@@ -47,9 +47,9 @@ class DataStore():
     def count_num_points(self):
         # Use this implementation for default format of subdirectory classes
         # (typically for image datasets), else override.
-        # Go through the dataset_dir and count number of points
+        # Go through the input_data_folder and count number of points
         num_train_points = 0
-        for root, subdirs, files in os.walk(self.dataset_dir):
+        for root, subdirs, files in os.walk(self.input_data_folder):
             for file in files:
                 num_train_points += 1
         self.num_train_points = num_train_points

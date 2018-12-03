@@ -45,18 +45,18 @@ class Cifar10(DataStore):
 
         # Generate train dataset
         f_train = Path(train_file_path).open('ab')
-        for root, sub_dirs, files in os.walk(self.dataset_dir):
+        for root, sub_dirs, files in os.walk(self.input_data_folder):
             for file in files:
                 if "data_batch" not in file:
                     continue
-                full_path = self.dataset_dir +'/'+ file
+                full_path = self.input_data_folder +'/'+ file
                 nparr = self.read_cifar_batch(full_path)
                 np.save(f_train, nparr)
 
         # Generate test dataset
         test_file_path = test_folder_path + '/' + self.DATA_FILE.format(0)
         f_test = Path(test_file_path).open('ab')
-        test_data_file = self.dataset_dir + "/test_batch"
+        test_data_file = self.input_data_folder + "/test_batch"
         nparr = self.read_cifar_batch(test_data_file)
         np.save(f_test, nparr)
 
