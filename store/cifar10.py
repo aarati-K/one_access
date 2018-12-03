@@ -1,4 +1,4 @@
-from store.store import DataStore
+from store.store import DataStore, Metadata, MetadataField
 import pickle
 import os
 import numpy as np
@@ -11,6 +11,13 @@ class Cifar10(DataStore):
     def __init__(self, **kwargs):
         super(Cifar10, self).__init__(**kwargs)
         self.dataset_name = "Cifar-10"
+        self.metadata = Metadata(self).load()
+        train_metadata = self.metadata.get(self.TRAIN_FOLDER)
+        if train_metadata:
+            self.key_size = train_metadata.get(MetadataField.KEY_SIZE)
+            self.value_size = train_metadata.get(MetadataField.VALUE_SIZE)
+        else:
+            self.key_size = self.value_size = None
 
     def count_num_points(self):
         self.num_train_points = 50000
@@ -63,9 +70,6 @@ class Cifar10(DataStore):
         # Create metadata for train and test folders
         self.write_metadata()
 
-    def write_metadata(self):
-        pass
-
     def read_cifar_batch(self, batch_filename):
         f = open(batch_filename, 'rb')
         p = pickle.load(f, encoding='bytes')
@@ -74,7 +78,44 @@ class Cifar10(DataStore):
         data_points= []
         for data_point, label in zip(data,labels):
             data_points.append([data_point, label])
+
+        # Assign key and value size, if not already assigned
+        if not self.key_size:
+            self.key_size = 4 # bytes
+            # value size + 1 (for label)
+            self.value_size = (len(data_points[0][0]) + 1)*4 #bytes
+
         return np.array(data_points)
+
+    def write_metadata(self):
+        metadata_dict = {}
+        train_metadata = {
+            MetadataField.KEY_SIZE: self.key_size,
+            MetadataField.VALUE_SIZE: self.value_size,
+            MetadataField.FILES: {
+                self.DATA_FILE.format('0'): {
+                    MetadataField.KV_COUNT: 50000,
+                    MetadataField.CHUNK_COUNT: 5,
+                }
+            }
+        }
+        metadata_dict[self.TRAIN_FOLDER] = train_metadata
+
+        test_metadata = {
+            MetadataField.KEY_SIZE: self.key_size,
+            MetadataField.VALUE_SIZE: self.value_size,
+            MetadataField.FILES: {
+                self.DATA_FILE.format('0'): {
+                    MetadataField.KV_COUNT: 10000,
+                    MetadataField.CHUNK_COUNT: 1,
+                }
+            }
+        }
+        metadata_dict[self.TEST_FOLDER] = test_metadata
+
+        metadata = Metadata(self)
+        metadata.store(metadata_dict)
+        self.metadata = metadata.load()
 
     def get_data_folder_path(self):
         return self.mem_config.get(StorageComponents.HDD)\

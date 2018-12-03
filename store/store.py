@@ -10,7 +10,9 @@ class MetadataField():
     KEY_SIZE = "key_size"
     VALUE_SIZE = "value_size"
     FILES = "files"
-    KV_COUNT = "count"
+    KV_COUNT = "kv_count"
+    # Number of numpy file chunks
+    CHUNK_COUNT = "chunk_count"
 
 
 class Metadata():
@@ -40,9 +42,11 @@ class Metadata():
             the metadata.
         """
         for root, sub_folders, files in os.walk(folder_name):
-            if METADATA_FILE not in files:
+            if self.METADATA_FILE not in files:
                 return {}
-            return json.loads(folder_name + '/' + self.METADATA_FILE)
+            metadata_file = folder_name + '/' + self.METADATA_FILE
+            metadata = open(metadata_file).read()
+            return json.loads(metadata)
 
     def store(self, metadata_dict):
         sub_folders = metadata_dict.keys()
@@ -64,24 +68,40 @@ class DataStore():
 
     def __init__(self, input_data_folder, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
                  batch_size=128, delete_existing=False):
+        # To be assigned by the derived class
         self.dataset_name = ""
+
+        # transform function to be applied to values and labels
         self.transform = transform
         self.target_transform = target_transform
 
         # The folder containing the input data, from which IR is generated
         self.input_data_folder = input_data_folder
 
-        self.mem_config = None
-        self.metadata = None
+        # Initialize mem_config
+        MemoryHierarchy.load()
+        self.mem_config = MemoryHierarchy.mem_config
+
+        # Initialize metadata, might be uninitialized if the datastore has not
+        # yet been created
+        self.metadata = Metadata(self).load()
+
+        # Statistics, computed by the derived class
         self.num_train_points = 0
         self.num_test_points = 0
+        self.key_size = 0
+        self.value_size = 0
+
+        # Delete any existing IR data folder
         self.delete_existing = delete_existing
 
+        # SAMPLING ATTRIBUTES
         self.max_samples = max_samples
         self.sample_size = sample_size
         # Samples populated by the SampleCreator process (shared memory)
         self.samples = Array('f', 0)
 
+        # BATCHING ATTRIBUTES
         self.max_batches = max_batches
         self.batch_size = batch_size
         # batches populated by the BatchCreator process (shared memory)
@@ -141,8 +161,6 @@ class DataStore():
         """
           Calls generateIR and generateSamples
         """
-        MemoryHierarchy.load()
-        self.mem_config = MemoryHierarchy.mem_config
         self.generate_IR()
         self.initialize_shared_mem()
         self.generate_samples()
