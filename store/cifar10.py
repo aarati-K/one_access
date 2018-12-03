@@ -23,8 +23,8 @@ class Cifar10(DataStore):
             Path(data_folder_path).mkdir(parents=True, exist_ok=True)
 
         # Create train and test directories
-        train_folder_path = data_folder_path + self.TRAIN_FOLDER
-        test_folder_path = data_folder_path + self.TEST_FOLDER
+        train_folder_path = data_folder_path + '/' + self.TRAIN_FOLDER
+        test_folder_path = data_folder_path + '/' + self.TEST_FOLDER
         for path in [train_folder_path, test_folder_path]:
             if not Path(path).exists():
                 print("Creating directory", path)

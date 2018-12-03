@@ -1,3 +1,4 @@
+import json
 import os
 import PIL
 from sampling.sample import Sample
@@ -5,18 +6,60 @@ from store.memory_hierarchy import MemoryHierarchy
 from torch.multiprocessing import Array
 
 
-class Metadata():
-    def __init__(self):
-        pass
+class MetadataField():
+    KEY_SIZE = "key_size"
+    VALUE_SIZE = "value_size"
+    FILES = "files"
+    KV_COUNT = "count"
 
+
+class Metadata():
+    METADATA_FILE = "metadata.json"
+
+    def __init__(self, data_store):
+        self.data_store = data_store
+
+    def load(self):
+        """
+            Recursively load the metadata from all the subfolders. Return a
+            dict with keys as relative paths from
+            data_store.get_data_folder_path() and value as metadata dict.
+        """
+        metadata_dict = {}
+        data_folder = self.data_store.get_data_folder_path() + '/'
+        for root, sub_folders, files in os.walk(data_folder):
+            for sub_folder in sub_folders:
+                metadata_dict[sub_folder] = \
+                    self._load(data_folder + sub_folder)
+
+        return metadata_dict
+
+    def _load(self, folder_name):
+        """
+            Load the metadata for the specific folder. Return a dict containing
+            the metadata.
+        """
+        for root, sub_folders, files in os.walk(folder_name):
+            if METADATA_FILE not in files:
+                return {}
+            return json.loads(folder_name + '/' + self.METADATA_FILE)
+
+    def store(self, metadata_dict):
+        sub_folders = metadata_dict.keys()
+        data_folder = self.data_store.get_data_folder_path() + '/'
+        for sub_folder in sub_folders:
+            filename = data_folder + sub_folder + '/' + self.METADATA_FILE
+            file = open(filename, 'w')
+            file.write(json.dumps(metadata_dict.get(sub_folder)))
+            file.close()
 
 class DataStore():
     """
       Base class for all store creators for different datasets
     """
     # relative path names of train and test folders
-    TRAIN_FOLDER = "/train"
-    TEST_FOLDER = "/test"
+    TRAIN_FOLDER = "train"
+    TEST_FOLDER = "test"
     DATA_FILE = "data_{}.npy"
 
     def __init__(self, input_data_folder, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
@@ -45,11 +88,11 @@ class DataStore():
         self.batches = Array('f', 0)
 
     def count_num_points(self):
-        # Use this implementation for default format of subdirectory classes
+        # Use this implementation for default format of subfolder classes
         # (typically for image datasets), else override.
         # Go through the input_data_folder and count number of points
         num_train_points = 0
-        for root, subdirs, files in os.walk(self.input_data_folder):
+        for root, subfolders, files in os.walk(self.input_data_folder):
             for file in files:
                 num_train_points += 1
         self.num_train_points = num_train_points
