@@ -2,7 +2,7 @@ import os
 import PIL
 from sampling.sample import Sample
 from store.memory_hierarchy import MemoryHierarchy
-from torch.multiprocessing import Process, Queue
+from torch.multiprocessing import Array
 
 
 class Metadata():
@@ -36,14 +36,13 @@ class DataStore():
 
         self.max_samples = max_samples
         self.sample_size = sample_size
-        # Samples pinned to heap memory, shared with the batch creator and
-        # sample creator processes
-        self.samples = Queue(max_samples)
+        # Samples populated by the SampleCreator process (shared memory)
+        self.samples = Array('f', 0)
 
         self.max_batches = max_batches
         self.batch_size = batch_size
-        # To be populated by the batch creator
-        self.batches = Queue(max_batches)
+        # batches populated by the BatchCreator process (shared memory)
+        self.batches = Array('f', 0)
 
     def count_num_points(self):
         # Use this implementation for default format of subdirectory classes
@@ -78,6 +77,14 @@ class DataStore():
         """
         pass
 
+    def initialize_shared_mem(self):
+        """
+            Initialize the self.samples and self.batches. These are shared
+            with the SampleCreator and BatchCreator processes.
+        """
+        # Decide on the size and data type of self.samples and self.batches
+        pass
+
     def generate_samples(self):
         """
           Create a SampleCreator object and create multiple samples
@@ -94,4 +101,5 @@ class DataStore():
         MemoryHierarchy.load()
         self.mem_config = MemoryHierarchy.mem_config
         self.generate_IR()
+        self.initialize_shared_mem()
         self.generate_samples()
