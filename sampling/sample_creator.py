@@ -13,7 +13,7 @@ class SampleCreator(Process):
   """
 
   def __init__(self, data_store):
-    super(P, self).__init__()
+    super(SampleCreator, self).__init__()
     self.ds = data_store
     self.num_train_points = self.ds.num_train_points
     self.sample_size = self.ds.sample_size
