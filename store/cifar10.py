@@ -53,25 +53,25 @@ class Cifar10(DataStore):
         # Generate train dataset
         f_train = Path(train_file_path).open('ab')
         for root, sub_dirs, files in os.walk(self.input_data_folder):
-            for file in files:
-                if "data_batch" not in file:
+            for filename in files:
+                if "data_batch" not in filename:
                     continue
-                full_path = self.input_data_folder +'/'+ file
-                nparr = self.read_cifar_batch(full_path)
+                full_path = self.input_data_folder +'/'+ filename
+                nparr = self.read_cifar_data_file(full_path)
                 np.save(f_train, nparr)
 
         # Generate test dataset
         test_file_path = test_folder_path + '/' + self.DATA_FILE.format(0)
         f_test = Path(test_file_path).open('ab')
         test_data_file = self.input_data_folder + "/test_batch"
-        nparr = self.read_cifar_batch(test_data_file)
+        nparr = self.read_cifar_data_file(test_data_file)
         np.save(f_test, nparr)
 
         # Create metadata for train and test folders
         self.write_metadata()
 
-    def read_cifar_batch(self, batch_filename):
-        f = open(batch_filename, 'rb')
+    def read_cifar_data_file(self, filename):
+        f = open(filename, 'rb')
         p = pickle.load(f, encoding='bytes')
         data = np.array(p.get(b'data'))
         labels = np.array(p.get(b'labels'))
