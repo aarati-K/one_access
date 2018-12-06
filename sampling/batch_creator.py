@@ -23,21 +23,28 @@ class BatchCreator(Process):
         """
         Keep creating the batches in the background
         """
+        cur_sample = None
         while not self.stop_batch_creator.is_set():
-            if self.ds.samples.empty():
-                print("Waiting for sample creator to create a sample")
-                continue
-            elif self.batches.full():
+            if self.batches.full():
                 print("Waiting for client to take a batch from batches array")
+                continue
+            elif cur_sample is None and self.ds.samples.empty():
+                print("Waiting for sample creator to create a sample")
                 continue
             else:
                 i = 0
-                if not curr_sample or self.offset == self.ds.sample_size:
-                    self.offset = 0
-                    curr_sample = self.ds.samples.get()
-                curr_batch = []
+                if cur_sample is None:
+                    cur_sample = self.ds.samples.get()
+
+                cur_batch = []
                 while i < self.batch_size:
-                    curr_batch.append(curr_sample[i+self.offset])
-                    i = i + 1
+                    cur_batch.append(cur_sample[i+self.offset])
+                    i += 1
+
                 self.offset += i
-                self.batches.put(np.array(curr_batch))
+                if self.offset == self.ds.sample_size:
+                    cur_sample = None
+                    self.offset = 0
+
+                print(cur_batch)
+                self.batches.put(np.array(cur_batch))

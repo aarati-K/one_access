@@ -40,4 +40,4 @@ class SampleCreator(Process):
             i += 1
 
         reservoir = self.ds.build_reservoir_sample(points)
-        self.ds.sample_size.put(reservoir)
+        self.ds.samples.put(reservoir)
