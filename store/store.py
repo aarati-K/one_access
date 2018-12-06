@@ -135,6 +135,12 @@ class DataStore():
         # - Set self.metadata field
         pass
 
+    def transform_point(self, value):
+        """
+            To be defined by the derived class
+        """
+        return value[0], value[1]
+
     def get_data_folder_path(self):
         """
             Return the folder containing the data in intermediate rep (IR)
@@ -200,7 +206,6 @@ class DataStore():
         cur_chunk_min_index = 0
         cur_chunk_max_index = cur_chunk.shape[0]
 
-        points.sort()
         for point in points:
             while point >= cur_chunk_max_index:
                 chunks_read += 1
@@ -211,8 +216,9 @@ class DataStore():
                 cur_chunk_max_index += cur_chunk.shape[0]
 
             value = cur_chunk[point-cur_chunk_min_index]
-            data.append(value[0])
-            labels.append(value[1])
+            d, l = self.transform_point(value)
+            data.append(d)
+            labels.append(l)
 
     def initialize_samples(self):
         """
