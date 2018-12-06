@@ -140,14 +140,6 @@ class DataStore():
         """
         pass
 
-    def initialize_shared_mem(self):
-        """
-            Initialize the self.samples and self.batches. These are shared
-            with the SampleCreator and BatchCreator processes.
-        """
-        # Decide on the size and data type of self.samples and self.batches
-        pass
-
     def generate_samples(self):
         """
           Create a SampleCreator object and create multiple samples
@@ -155,12 +147,13 @@ class DataStore():
         # Decide on the number of samples to create at each level of
         # the memory hierarchy. (If there is no SSD, no need to create samples)
         # self.samples refers to the reservoir samples in memory
-        pass
+        s = SampleCreator(self)
+        if not self.samples.full():
+            s.create_sample()
 
     def initialize(self):
         """
           Calls generateIR and generateSamples
         """
         self.generate_IR()
-        self.initialize_shared_mem()
         self.generate_samples()
