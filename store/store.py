@@ -1,9 +1,7 @@
 import json
 import os
-import PIL
-from sampling.sample import Sample
 from store.memory_hierarchy import MemoryHierarchy
-from torch.multiprocessing import Array
+from torch.multiprocessing import Queue
 
 
 class MetadataField():
@@ -99,13 +97,15 @@ class DataStore():
         self.max_samples = max_samples
         self.sample_size = sample_size
         # Samples populated by the SampleCreator process (shared memory)
-        self.samples = Array('f', 0)
+        self.samples = Queue(self.max_samples)
 
         # BATCHING ATTRIBUTES
         self.max_batches = max_batches
         self.batch_size = batch_size
         # batches populated by the BatchCreator process (shared memory)
-        self.batches = Array('f', 0)
+        self.batches = Queue(self.max_batches)
+
+
 
     def count_num_points(self):
         # Use this implementation for default format of subfolder classes
