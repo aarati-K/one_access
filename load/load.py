@@ -1,6 +1,6 @@
 import torch.multiprocessing as mp
 from sampling.sample_creator import SampleCreator
-
+from sampling.batch_creator import BatchCreator
 
 class DataLoader():
 
@@ -18,7 +18,8 @@ class DataLoader():
     sc.start()
     
     # Start batch_creator(s)
-
+    bc = BatchCreator(self.data_store)
+    bc.start()
     # Wait for sub-processes to terminate
     sc.join()
 
