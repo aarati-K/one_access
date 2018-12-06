@@ -2,6 +2,9 @@ import json
 import os
 from store.memory_hierarchy import MemoryHierarchy
 from torch.multiprocessing import Queue
+import numpy as np
+import torch
+from sampling.sample_creator import SampleCreator
 
 
 class MetadataField():
@@ -64,8 +67,8 @@ class DataStore():
     TEST_FOLDER = "test"
     DATA_FILE = "data_{}.npy"
 
-    def __init__(self, input_data_folder, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
-                 batch_size=128, delete_existing=False):
+    def __init__(self, input_data_folder, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=10,
+                 batch_size=1, delete_existing=False):
         # To be assigned by the derived class
         self.dataset_name = ""
 
@@ -105,8 +108,6 @@ class DataStore():
         # batches populated by the BatchCreator process (shared memory)
         self.batches = Queue(self.max_batches)
 
-
-
     def count_num_points(self):
         # Use this implementation for default format of subfolder classes
         # (typically for image datasets), else override.
@@ -144,7 +145,74 @@ class DataStore():
         """
             Build a reservoir sample with points
         """
-        return None
+        points.sort()
+        data = []
+        labels = []
+        file_to_points_map = {}
+
+        cur_data_file_index = 0
+        cur_data_file_path = self.DATA_FILE.format(str(cur_data_file_index))
+        metadata = self.metadata.get(self.TRAIN_FOLDER)
+        cur_file_metadata = metadata[MetadataField.FILES][cur_data_file_path]
+        cur_file_min_index = 0
+        cur_file_max_index = cur_file_metadata[MetadataField.KV_COUNT] # - 1
+
+        points_from_cur_file = []
+        for point in points:
+            if point >= cur_file_max_index:
+                # Save the cur files points to the map
+                points_in_file = map(lambda point: point-cur_file_min_index, points_from_cur_file)
+                file_to_points_map[cur_data_file_path] = points_in_file
+
+                # Find the next file
+                points_from_cur_file = []
+                while point >= cur_file_max_index:
+                    cur_data_file_index += 1
+                    cur_data_file_path = self.DATA_FILE.format(str(cur_data_file_index))
+                    cur_file_metadata = metadata[MetadataField.FILES][cur_data_file_path]
+                    cur_file_min_index = cur_file_max_index
+                    cur_file_max_index += cur_file_metadata[MetadataField.KV_COUNT]
+
+            # get points from current file
+            points_from_cur_file.append(point)
+
+        # Entry for the last file
+        points_in_file = map(lambda point: point-cur_file_min_index, points_from_cur_file)
+        file_to_points_map[cur_data_file_path] = points_in_file
+        # Iterate over all the files
+        for filename in file_to_points_map.keys():
+            points_in_file = file_to_points_map[filename]
+            self.get_sample_from_file(filename, points_in_file, data, labels)
+
+        return [np.array(data), np.array(labels)]
+
+    def get_sample_from_file(self, filename, points, data, labels):
+        if not points:
+            return
+
+        full_path = self.get_data_folder_path() + '/' + self.TRAIN_FOLDER \
+            + '/' + filename
+        metadata = self.metadata[self.TRAIN_FOLDER][MetadataField.FILES][filename]
+        num_chunks = metadata[MetadataField.CHUNK_COUNT]
+        chunks_read = 1
+        f = open(full_path, 'rb')
+        cur_chunk = np.load(f)
+        cur_chunk_min_index = 0
+        cur_chunk_max_index = cur_chunk.shape[0]
+
+        points.sort()
+        for point in points:
+            while point >= cur_chunk_max_index:
+                chunks_read += 1
+                if chunks_read > num_chunks:
+                    print("Did not find chunk for index ", point)
+                cur_chunk = np.load(f)
+                cur_chunk_min_index = cur_chunk_max_index
+                cur_chunk_max_index += cur_chunk.shape[0]
+
+            value = cur_chunk[point-cur_chunk_min_index]
+            data.append(value[0])
+            labels.append(value[1])
 
     def initialize_samples(self):
         """
@@ -153,7 +221,7 @@ class DataStore():
         # Decide on the number of samples to create at each level of
         # the memory hierarchy. (If there is no SSD, no need to create samples)
         # self.samples refers to the reservoir samples in memory
-        s = SampleCreator(self)
+        s = SampleCreator(self, event=None)
         if not self.samples.full():
             s.create_sample()
 
@@ -162,4 +230,5 @@ class DataStore():
           Calls generateIR and generateSamples
         """
         self.generate_IR()
+        self.count_num_points()
         self.initialize_samples()
