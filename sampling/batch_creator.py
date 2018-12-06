@@ -5,9 +5,9 @@ import numpy as np
 
 
 class BatchCreator(Process):
-    '''
-      Responsible for creating batches from the created samples
-    '''
+    """
+    Responsible for creating batches from the created samples
+    """
 
     def __init__(self, data_store, event):
         super(BatchCreator, self).__init__()
@@ -29,14 +29,13 @@ class BatchCreator(Process):
                 continue
             elif self.batches.full():
                 print("Waiting for client to take a batch from batches array")
-                sleep(10)
                 continue
             else:
-                i=0
-                curr_sample =[]
-                if not cur_sample or self.offset == self.ds.sample_size:
+                i = 0
+                curr_sample = []
+                if not curr_sample or self.offset == self.ds.sample_size:
                     self.offset = 0
-                    cur_sample = self.ds.samples.get()
+                    curr_sample = self.ds.samples.get()
                 curr_batch = []
                 while i < self.batch_size:
                     curr_batch.append(curr_sample[i+self.offset])
