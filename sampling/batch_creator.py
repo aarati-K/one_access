@@ -32,7 +32,6 @@ class BatchCreator(Process):
                 continue
             else:
                 i = 0
-                curr_sample = []
                 if not curr_sample or self.offset == self.ds.sample_size:
                     self.offset = 0
                     curr_sample = self.ds.samples.get()
