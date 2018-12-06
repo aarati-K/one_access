@@ -140,7 +140,13 @@ class DataStore():
         """
         pass
 
-    def generate_samples(self):
+    def build_reservoir_sample(self, points):
+        """
+            Build a reservoir sample with points
+        """
+        return None
+
+    def initialize_samples(self):
         """
           Create a SampleCreator object and create multiple samples
         """
@@ -156,4 +162,4 @@ class DataStore():
           Calls generateIR and generateSamples
         """
         self.generate_IR()
-        self.generate_samples()
+        self.initialize_samples()

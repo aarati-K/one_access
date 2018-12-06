@@ -9,42 +9,35 @@ class SampleCreator(Process):
       Design reference: https://stackoverflow.com/questions/17172878/using-pythons-multiprocessing-process-class
     """
 
-    def __init__(self, data_store):
+    def __init__(self, data_store, event):
         super(SampleCreator, self).__init__()
         self.ds = data_store
         self.num_train_points = self.ds.num_train_points
         self.sample_size = self.ds.sample_size
+        self.stop_sample_creator = event
 
     def run(self):
         """
           Keep creating samples in the background.
         """
-        while True:
-            i = 0
-            point = 0
-            points = []
-            while i < self.sample_size and i < self.num_train_points:
-                points.append((i, point))
-                i += 1
-                point += 1
+        while not self.stop_sample_creator.is_set():
+            if self.ds.samples.full():
+                continue
+            else:
+                self.create_sample()
 
-            while i >= self.sample_size and i < self.num_train_points:
-                m = self.sample_size
-                s = random.randint(0, self.sample_size + i)
-                if s < m:
-                    points.append((m, point))
-                i += 1
-                point += 1
+    def create_sample(self):
+        points = []
+        i = 0
+        while i < self.sample_size and i < self.num_train_points:
+            points.append(i)
+            i += 1
 
-            reservoir = build_reservoir(points, self.sample_size)
+        while i >= self.sample_size and i < self.num_train_points:
+            p = random.randint(0, i)
+            if p < self.sample_size:
+                points[p] = i
+            i += 1
 
-            # Blocks if max number of samples met
-            # TODO: Only for memory sampling rn, add SSD/Disk support later
-            self.ds.samples.put(reservoir)
-
-    def build_reservoir(self, points, sample_size):
-        """ Get next blob into memory, read points from it, and then move on to
-          next blob from ir location. """
-        reservoir = Sample(sample_size)
-        # TODO: Fill reservoir
-        return reservoir
+        reservoir = self.ds.build_reservoir_sample(points)
+        self.ds.sample_size.put(reservoir)

@@ -23,8 +23,10 @@ class DataLoader:
         # Start batch_creator(s)
         bc = batch_creator.BatchCreator(self.ds, self.event)
         bc.start()
+
         # Wait for sub-processes to terminate
         sc.join()
+        bc.join()
 
     def get_next_batch(self):
         """
