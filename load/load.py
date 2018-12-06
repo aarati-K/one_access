@@ -5,14 +5,13 @@ from multiprocessing import Event
 
 class DataLoader:
 
-    def __init__(self, data_store, batch_size=10):
+    def __init__(self, data_store):
         """
           Start the batchCreator and sampleCreator.
           Read the memory config file, and create the right number
           of processes.
         """
         self.ds = data_store
-        self.ds.batch_size = batch_size
         # Event to stop batch creator and sample creator
         self.event = Event()
 
