@@ -1,3 +1,5 @@
+from time import sleep
+
 from torch.multiprocessing import Process
 import numpy as np
 
@@ -7,14 +9,14 @@ class BatchCreator(Process):
       Responsible for creating batches from the created samples
     '''
 
-    def __init__(self, data_store):
+    def __init__(self, data_store, event):
         super(BatchCreator, self).__init__()
         self.ds = data_store
         self.batch_size = self.ds.batch_size
         self.batches = self.ds.batches
         self.max_batches = self.ds.max_batches
         self.offset = 0
-        self.stop_batch_creator = self.ds.event
+        self.stop_batch_creator = event
         self.is_stop = False
 
     def run(self):
@@ -25,12 +27,16 @@ class BatchCreator(Process):
             if self.ds.samples.empty():
                 print("Waiting for sample creator to create a sample")
                 continue
-            elif self.batches is self.max_batches:
+            elif self.batches.full():
                 print("Waiting for client to take a batch from batches array")
+                sleep(10)
                 continue
             else:
                 i=0
-                curr_sample = self.ds.samples.get()
+                curr_sample =[]
+                if not cur_sample or self.offset == self.ds.sample_size:
+                    self.offset = 0
+                    cur_sample = self.ds.samples.get()
                 curr_batch = []
                 while i < self.batch_size:
                     curr_batch.append(curr_sample[i+self.offset])

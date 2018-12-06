@@ -1,7 +1,5 @@
 import json
 import os
-import PIL
-from multiprocessing import Event
 from store.memory_hierarchy import MemoryHierarchy
 from torch.multiprocessing import Queue
 
@@ -107,8 +105,7 @@ class DataStore():
         # batches populated by the BatchCreator process (shared memory)
         self.batches = Queue(self.max_batches)
 
-        # Event to stop batch creator and sample creator
-        self.event = Event()
+
 
     def count_num_points(self):
         # Use this implementation for default format of subfolder classes
