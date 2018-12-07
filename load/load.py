@@ -1,30 +1,27 @@
-import sample_creator
-import batch_creator
+from sampling.sample_creator import SampleCreator
+from sampling.batch_creator import BatchCreator
 from multiprocessing import Event
 
 
 class DataLoader:
 
-    def __init__(self, data_store, batch_size=10):
+    def __init__(self, data_store):
         """
           Start the batchCreator and sampleCreator.
           Read the memory config file, and create the right number
           of processes.
         """
         self.ds = data_store
-        self.ds.batch_size = batch_size
         # Event to stop batch creator and sample creator
         self.event = Event()
 
         # Start separate processes for sample_creator(s)
-        sc = sample_creator.SampleCreator(self.ds, self.event)
-        sc.start()
+        self.sc = SampleCreator(self.ds, self.event)
+        self.sc.start()
 
         # Start batch_creator(s)
-        bc = batch_creator.BatchCreator(self.ds, self.event)
-        bc.start()
-        # Wait for sub-processes to terminate
-        sc.join()
+        self.bc = BatchCreator(self.ds, self.event)
+        self.bc.start()
 
     def get_next_batch(self):
         """
@@ -37,6 +34,6 @@ class DataLoader:
 
     def stop_batch_creation(self):
         self.event.set()
-
-
-
+        # Wait for child processes to end
+        self.bc.join()
+        self.sc.join()

@@ -2,6 +2,9 @@ import json
 import os
 from store.memory_hierarchy import MemoryHierarchy
 from torch.multiprocessing import Queue
+import numpy as np
+import torch
+from sampling.sample_creator import SampleCreator
 
 
 class MetadataField():
@@ -64,8 +67,8 @@ class DataStore():
     TEST_FOLDER = "test"
     DATA_FILE = "data_{}.npy"
 
-    def __init__(self, input_data_folder, max_batches=1, transform=None, target_transform=None, max_samples=1, sample_size=100,
-                 batch_size=128, delete_existing=False):
+    def __init__(self, input_data_folder, max_batches=1, batch_size=1, max_samples=1,
+        transform=None, target_transform=None, delete_existing=False):
         # To be assigned by the derived class
         self.dataset_name = ""
 
@@ -95,7 +98,7 @@ class DataStore():
 
         # SAMPLING ATTRIBUTES
         self.max_samples = max_samples
-        self.sample_size = sample_size
+        self.sample_size = batch_size*10
         # Samples populated by the SampleCreator process (shared memory)
         self.samples = Queue(self.max_samples)
 
@@ -104,8 +107,6 @@ class DataStore():
         self.batch_size = batch_size
         # batches populated by the BatchCreator process (shared memory)
         self.batches = Queue(self.max_batches)
-
-
 
     def count_num_points(self):
         # Use this implementation for default format of subfolder classes
@@ -134,33 +135,106 @@ class DataStore():
         # - Set self.metadata field
         pass
 
+    def transform_point(self, value):
+        """
+            To be defined by the derived class
+        """
+        return value[0], value[1]
+
     def get_data_folder_path(self):
         """
             Return the folder containing the data in intermediate rep (IR)
         """
         pass
 
-    def initialize_shared_mem(self):
+    def build_reservoir_sample(self, points):
         """
-            Initialize the self.samples and self.batches. These are shared
-            with the SampleCreator and BatchCreator processes.
+            Build a reservoir sample with points
         """
-        # Decide on the size and data type of self.samples and self.batches
-        pass
+        points.sort()
+        data = []
+        labels = []
+        file_to_points_map = {}
 
-    def generate_samples(self):
+        cur_data_file_index = 0
+        cur_data_file_path = self.DATA_FILE.format(str(cur_data_file_index))
+        metadata = self.metadata.get(self.TRAIN_FOLDER)
+        cur_file_metadata = metadata[MetadataField.FILES][cur_data_file_path]
+        cur_file_min_index = 0
+        cur_file_max_index = cur_file_metadata[MetadataField.KV_COUNT] # - 1
+
+        points_from_cur_file = []
+        for point in points:
+            if point >= cur_file_max_index:
+                # Save the cur files points to the map
+                points_in_file = map(lambda point: point-cur_file_min_index, points_from_cur_file)
+                file_to_points_map[cur_data_file_path] = points_in_file
+
+                # Find the next file
+                points_from_cur_file = []
+                while point >= cur_file_max_index:
+                    cur_data_file_index += 1
+                    cur_data_file_path = self.DATA_FILE.format(str(cur_data_file_index))
+                    cur_file_metadata = metadata[MetadataField.FILES][cur_data_file_path]
+                    cur_file_min_index = cur_file_max_index
+                    cur_file_max_index += cur_file_metadata[MetadataField.KV_COUNT]
+
+            # get points from current file
+            points_from_cur_file.append(point)
+
+        # Entry for the last file
+        points_in_file = map(lambda point: point-cur_file_min_index, points_from_cur_file)
+        file_to_points_map[cur_data_file_path] = points_in_file
+        # Iterate over all the files
+        for filename in file_to_points_map.keys():
+            points_in_file = file_to_points_map[filename]
+            self.get_sample_from_file(filename, points_in_file, data, labels)
+
+        return [np.array(data), np.array(labels)]
+
+    def get_sample_from_file(self, filename, points, data, labels):
+        if not points:
+            return
+
+        full_path = self.get_data_folder_path() + '/' + self.TRAIN_FOLDER \
+            + '/' + filename
+        metadata = self.metadata[self.TRAIN_FOLDER][MetadataField.FILES][filename]
+        num_chunks = metadata[MetadataField.CHUNK_COUNT]
+        chunks_read = 1
+        f = open(full_path, 'rb')
+        cur_chunk = np.load(f)
+        cur_chunk_min_index = 0
+        cur_chunk_max_index = cur_chunk.shape[0]
+
+        for point in points:
+            while point >= cur_chunk_max_index:
+                chunks_read += 1
+                if chunks_read > num_chunks:
+                    print("Did not find chunk for index ", point)
+                cur_chunk = np.load(f)
+                cur_chunk_min_index = cur_chunk_max_index
+                cur_chunk_max_index += cur_chunk.shape[0]
+
+            value = cur_chunk[point-cur_chunk_min_index]
+            d, l = self.transform_point(value)
+            data.append(d)
+            labels.append(l)
+
+    def initialize_samples(self):
         """
           Create a SampleCreator object and create multiple samples
         """
         # Decide on the number of samples to create at each level of
         # the memory hierarchy. (If there is no SSD, no need to create samples)
         # self.samples refers to the reservoir samples in memory
-        pass
+        s = SampleCreator(self, event=None)
+        if not self.samples.full():
+            s.create_sample()
 
     def initialize(self):
         """
           Calls generateIR and generateSamples
         """
         self.generate_IR()
-        self.initialize_shared_mem()
-        self.generate_samples()
+        self.count_num_points()
+        self.initialize_samples()

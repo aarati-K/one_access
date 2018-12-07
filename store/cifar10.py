@@ -87,6 +87,11 @@ class Cifar10(DataStore):
 
         return np.array(data_points)
 
+    def transform_point(self, value):
+        # assert(type(value) == list)
+        value[0] = value[0].reshape(3, 32, 32)
+        return value[0], value[1]
+
     def write_metadata(self):
         metadata_dict = {}
         train_metadata = {
@@ -120,8 +125,3 @@ class Cifar10(DataStore):
     def get_data_folder_path(self):
         return self.mem_config.get(StorageComponents.HDD)\
             .get(StorageAttributes.ONE_ACCESS_DIR) + '/' + self.dataset_name
-
-    def generate_samples(self):
-        for i in range(self.max_samples-1):
-            s = SampleCreator(self)
-            s.create_samples()

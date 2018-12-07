@@ -1,5 +1,6 @@
 from time import sleep
 
+import torch
 from torch.multiprocessing import Process
 import numpy as np
 
@@ -23,21 +24,32 @@ class BatchCreator(Process):
         """
         Keep creating the batches in the background
         """
+        cur_sample = None
         while not self.stop_batch_creator.is_set():
-            if self.ds.samples.empty():
-                print("Waiting for sample creator to create a sample")
+            if self.batches.full():
                 continue
-            elif self.batches.full():
-                print("Waiting for client to take a batch from batches array")
+            elif cur_sample is None and self.ds.samples.empty():
                 continue
             else:
                 i = 0
-                if not curr_sample or self.offset == self.ds.sample_size:
-                    self.offset = 0
-                    curr_sample = self.ds.samples.get()
-                curr_batch = []
+                if cur_sample is None:
+                    cur_sample = self.ds.samples.get()
+
+                cur_batch_data = []
+                cur_batch_labels = []
                 while i < self.batch_size:
-                    curr_batch.append(curr_sample[i+self.offset])
-                    i = i + 1
+                    cur_batch_data.append(cur_sample[0][i+self.offset])
+                    cur_batch_labels.append(cur_sample[1][i+self.offset])
+                    i += 1
+
                 self.offset += i
-                self.batches.put(np.array(curr_batch))
+                if self.offset == self.ds.sample_size:
+                    cur_sample = None
+                    self.offset = 0
+
+                cur_batch_data = np.array(cur_batch_data)
+                cur_batch_data = torch.from_numpy(cur_batch_data)
+
+                cur_batch_labels = np.array(cur_batch_labels)
+                cur_batch_labels = torch.from_numpy(cur_batch_labels)
+                self.batches.put((cur_batch_data, cur_batch_labels))
