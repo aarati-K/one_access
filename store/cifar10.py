@@ -5,6 +5,7 @@ import numpy as np
 from pathlib import Path
 from store.memory_hierarchy import StorageAttributes, StorageComponents
 from sampling.sample_creator import SampleCreator
+from PIL import Image
 
 
 class Cifar10(DataStore):
@@ -89,7 +90,7 @@ class Cifar10(DataStore):
 
     def transform_point(self, value):
         # assert(type(value) == list)
-        value[0] = value[0].reshape(3, 32, 32)
+        value[0] = value[0].reshape(1, 3072)
         return value[0], value[1]
 
     def write_metadata(self):

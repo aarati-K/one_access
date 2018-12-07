@@ -3,6 +3,7 @@ from time import sleep
 import torch
 from torch.multiprocessing import Process
 import numpy as np
+from torchvision import transforms
 
 
 class BatchCreator(Process):
@@ -47,9 +48,12 @@ class BatchCreator(Process):
                     cur_sample = None
                     self.offset = 0
 
+                # Apply transforms
                 cur_batch_data = np.array(cur_batch_data)
-                cur_batch_data = torch.from_numpy(cur_batch_data)
+                cur_batch_data = transforms.ToTensor()(cur_batch_data)
+                cur_batch_data = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))(cur_batch_data)
 
                 cur_batch_labels = np.array(cur_batch_labels)
                 cur_batch_labels = torch.from_numpy(cur_batch_labels)
+
                 self.batches.put((cur_batch_data, cur_batch_labels))
