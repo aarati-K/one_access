@@ -14,7 +14,7 @@ Using Python 3.6+ with `virtualenv`:
 Further steps are performed assuming the user is in virtualenv, with Python 3.6.
 Installing (without CUDA):  
 `$ pip install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl`  
-`$ pip install -r requriements.txt`  
+`$ pip install -r requirements.txt`  
 
 More information on installing PyTorch locally:
 https://pytorch.org/get-started/locally/
