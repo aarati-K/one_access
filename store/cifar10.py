@@ -1,10 +1,10 @@
-from store.store import DataStore, Metadata, MetadataField
-import pickle
-import os
-import numpy as np
 from pathlib import Path
-from store.memory_hierarchy import StorageAttributes, StorageComponents
 from sampling.sample_creator import SampleCreator
+from store.memory_hierarchy import StorageAttributes, StorageComponents
+from store.store import DataStore, Metadata, MetadataField
+import numpy as np
+import os
+import pickle
 
 
 class Cifar10(DataStore):
@@ -12,6 +12,8 @@ class Cifar10(DataStore):
         super(Cifar10, self).__init__(**kwargs)
         self.dataset_name = "Cifar-10"
         self.metadata = Metadata(self).load()
+        if not self.metadata:
+            self.generate_IR()
         train_metadata = self.metadata.get(self.TRAIN_FOLDER)
         if train_metadata:
             self.key_size = train_metadata.get(MetadataField.KEY_SIZE)
