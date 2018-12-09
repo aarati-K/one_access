@@ -1,8 +1,9 @@
+from PIL import Image
 from time import sleep
-
-import torch
 from torch.multiprocessing import Process
 import numpy as np
+import torch
+import torchvision.transforms as transforms
 
 
 class BatchCreator(Process):
@@ -15,10 +16,12 @@ class BatchCreator(Process):
         self.ds = data_store
         self.batch_size = self.ds.batch_size
         self.batches = self.ds.batches
+        self.is_stop = False
         self.max_batches = self.ds.max_batches
         self.offset = 0
         self.stop_batch_creator = event
-        self.is_stop = False
+        self.target_transform = self.ds.target_transform
+        self.transform = self.ds.transform
 
     def run(self):
         """
@@ -49,6 +52,13 @@ class BatchCreator(Process):
 
                 cur_batch_data = np.array(cur_batch_data)
                 cur_batch_data = torch.from_numpy(cur_batch_data)
+                if self.transform:
+                    cur_batch_data_ = []
+                    for img_tensor in cur_batch_data:
+                        img = transforms.ToPILImage()(img_tensor)
+                        img = self.transform(img)
+                        cur_batch_data_.append(img)
+                    cur_batch_data = torch.stack(cur_batch_data_)
 
                 cur_batch_labels = np.array(cur_batch_labels)
                 cur_batch_labels = torch.from_numpy(cur_batch_labels)
