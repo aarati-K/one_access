@@ -9,7 +9,7 @@ transform = transforms.Compose([
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 
-trainset = Cifar10(input_data_folder="./cifar-10-batches-py/")
+trainset = Cifar10(input_data_folder="./cifar-10-batches-py/", transform=transform)
 trainset.initialize()
 trainloader = DataLoader(trainset)
 
@@ -56,7 +56,6 @@ for epoch in range(2):  # loop over the dataset multiple times
 
         # get the inputs
         inputs, labels = trainloader.get_next_batch()
-        inputs = inputs.float()
 
         # zero the parameter gradients
         optimizer.zero_grad()
