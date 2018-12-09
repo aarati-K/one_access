@@ -61,5 +61,13 @@ class BatchCreator(Process):
                     cur_batch_data = torch.stack(cur_batch_data_)
 
                 cur_batch_labels = np.array(cur_batch_labels)
-                cur_batch_labels = torch.from_numpy(cur_batch_labels)
+                cur_batch_labels = torch.from_numpy(cur_batch_labels) 
+                if self.target_transform:
+                    cur_batch_labels_ = []
+                    for img_tensor in cur_batch_labels:
+                        img = transforms.ToPILImage()(img_tensor)
+                        img = self.target_transform(img)
+                        cur_batch_labels_.append(img)
+                    cur_batch_labels = torch.stack(cur_batch_labels_)
+                    
                 self.batches.put((cur_batch_data, cur_batch_labels))
