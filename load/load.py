@@ -1,6 +1,6 @@
 from sampling.sample_creator import SampleCreator
 from sampling.batch_creator import BatchCreator
-from multiprocessing import Event
+from torch.multiprocessing import Event
 
 
 class DataLoader:
