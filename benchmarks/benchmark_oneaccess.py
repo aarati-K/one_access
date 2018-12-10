@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 batch_size = 4
 ds = Cifar10(input_data_folder="/home/aarati/workspace/torch/data/cifar-10-batches-py",\
-        max_batches=2, batch_size=batch_size, transform=transforms.ToTensor())
+        max_batches=2, batch_size=batch_size, max_samples=10, transform=transforms.ToTensor())
 ds.initialize()
 dl = DataLoader(ds)
 

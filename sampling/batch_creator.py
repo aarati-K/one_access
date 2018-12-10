@@ -31,43 +31,44 @@ class BatchCreator(Process):
         while not self.stop_batch_creator.is_set():
             if self.batches.full():
                 continue
-            elif cur_sample is None and self.ds.samples.empty():
-                continue
-            else:
-                i = 0
-                if cur_sample is None:
-                    cur_sample = self.ds.samples.get()
+            for sample_queue in self.ds.samples:
+                if cur_sample is None and sample_queue.empty():
+                    continue
+                else:
+                    i = 0
+                    if cur_sample is None:
+                        cur_sample = sample_queue.get()
 
-                cur_batch_data = []
-                cur_batch_labels = []
-                while i < self.batch_size:
-                    cur_batch_data.append(cur_sample[0][i+self.offset])
-                    cur_batch_labels.append(cur_sample[1][i+self.offset])
-                    i += 1
+                    cur_batch_data = []
+                    cur_batch_labels = []
+                    while i < self.batch_size:
+                        cur_batch_data.append(cur_sample[0][i+self.offset])
+                        cur_batch_labels.append(cur_sample[1][i+self.offset])
+                        i += 1
 
-                self.offset += i
-                if self.offset == self.ds.sample_size:
-                    cur_sample = None
-                    self.offset = 0
+                    self.offset += i
+                    if self.offset == self.ds.sample_size:
+                        cur_sample = None
+                        self.offset = 0
 
-                cur_batch_data = np.array(cur_batch_data)
-                cur_batch_data = torch.from_numpy(cur_batch_data)
-                if self.transform:
-                    cur_batch_data_ = []
-                    for img_tensor in cur_batch_data:
-                        img = transforms.ToPILImage()(img_tensor)
-                        img = self.transform(img)
-                        cur_batch_data_.append(img)
-                    cur_batch_data = torch.stack(cur_batch_data_)
+                    cur_batch_data = np.array(cur_batch_data)
+                    cur_batch_data = torch.from_numpy(cur_batch_data)
+                    if self.transform:
+                        cur_batch_data_ = []
+                        for img_tensor in cur_batch_data:
+                            img = transforms.ToPILImage()(img_tensor)
+                            img = self.transform(img)
+                            cur_batch_data_.append(img)
+                        cur_batch_data = torch.stack(cur_batch_data_)
 
-                cur_batch_labels = np.array(cur_batch_labels)
-                cur_batch_labels = torch.from_numpy(cur_batch_labels) 
-                if self.target_transform:
-                    cur_batch_labels_ = []
-                    for img_tensor in cur_batch_labels:
-                        img = transforms.ToPILImage()(img_tensor)
-                        img = self.target_transform(img)
-                        cur_batch_labels_.append(img)
-                    cur_batch_labels = torch.stack(cur_batch_labels_)
-                    
-                self.batches.put((cur_batch_data, cur_batch_labels))
+                    cur_batch_labels = np.array(cur_batch_labels)
+                    cur_batch_labels = torch.from_numpy(cur_batch_labels) 
+                    if self.target_transform:
+                        cur_batch_labels_ = []
+                        for img_tensor in cur_batch_labels:
+                            img = transforms.ToPILImage()(img_tensor)
+                            img = self.target_transform(img)
+                            cur_batch_labels_.append(img)
+                        cur_batch_labels = torch.stack(cur_batch_labels_)
+                        
+                    self.batches.put((cur_batch_data, cur_batch_labels))

@@ -21,12 +21,13 @@ class SampleCreator(Process):
           Keep creating samples in the background.
         """
         while not self.stop_sample_creator.is_set():
-            if self.ds.samples.full():
-                continue
-            else:
-                self.create_sample()
+            for sample_queue in self.ds.samples:
+                if sample_queue.full():
+                    continue
+                else:
+                    self.create_sample(sample_queue)
 
-    def create_sample(self):
+    def create_sample(self, sample_queue):
         points = []
         i = 0
         while i < self.sample_size and i < self.num_train_points:
@@ -40,4 +41,4 @@ class SampleCreator(Process):
             i += 1
 
         reservoir = self.ds.build_reservoir_sample(points)
-        self.ds.samples.put(reservoir)
+        sample_queue.put(reservoir)

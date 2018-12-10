@@ -100,7 +100,7 @@ class DataStore():
         self.max_samples = max_samples
         self.sample_size = batch_size*10
         # Samples populated by the SampleCreator process (shared memory)
-        self.samples = Queue(self.max_samples)
+        self.samples = [Queue(1) for i in range(self.max_samples)]
 
         # BATCHING ATTRIBUTES
         self.max_batches = max_batches
@@ -228,8 +228,8 @@ class DataStore():
         # the memory hierarchy. (If there is no SSD, no need to create samples)
         # self.samples refers to the reservoir samples in memory
         s = SampleCreator(self, event=None)
-        if not self.samples.full():
-            s.create_sample()
+        for sample_queue in self.samples:
+            s.create_sample(sample_queue)
 
     def initialize(self):
         """
