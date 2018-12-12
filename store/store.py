@@ -68,7 +68,7 @@ class DataStore():
     DATA_FILE = "data_{}.npy"
 
     def __init__(self, input_data_folder, max_batches=1, batch_size=1, max_samples=1,
-        transform=None, target_transform=None, delete_existing=False):
+        rel_sample_size=10, transform=None, target_transform=None, delete_existing=False):
         # To be assigned by the derived class
         self.dataset_name = ""
 
@@ -98,7 +98,8 @@ class DataStore():
 
         # SAMPLING ATTRIBUTES
         self.max_samples = max_samples
-        self.sample_size = batch_size*10
+        self.rel_sample_size = rel_sample_size
+        self.sample_size = batch_size*rel_sample_size
         # Samples populated by the SampleCreator process (shared memory)
         self.samples = [Queue(1) for i in range(self.max_samples)]
 
