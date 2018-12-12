@@ -19,3 +19,14 @@ print(end-start)
 # 100: 0.708
 # 1000: 0.715
 # 10000: 0.746
+
+# Plotting code
+# x = [1, 10, 50, 100, 1000, 10000]
+# y = [0.45, 0.702, 0.703, 0.708, 0.715, 0.746]
+# plt.plot(x, y, color='b', marker='o', markerfacecolor='k', markersize=10, fillstyle='full', linewidth=3, linestyle='solid')
+# plt.xscale('log')
+# plt.ylim(0.40, 0.78)
+# plt.xlabel("Reservoir Sample Size", fontsize=14, fontweight='semibold', fontname='serif')
+# plt.ylabel("Creation Time (s)", fontsize=14, fontweight='semibold', fontname='serif')
+# plt.xticks(x, [1, 10, '', 100, 1000, 10000])
+# plt.show()
