@@ -4,13 +4,15 @@ import torchvision.transforms as transforms
 import time
 from cifar import CIFAR10
 import matplotlib.pyplot as plt
+import numpy as np
+from pathlib import Path
 
 transform = transforms.Compose([transforms.ToTensor()])
 
-trainset = CIFAR10(root='./data', train=True,
-                                        download=True, transform=transforms.ToTensor())
+trainset = CIFAR10(root='/home/aarati/datasets', train=True,
+        download=True, transform=transforms.ToTensor())
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                          shuffle=True, num_workers=0)
+        shuffle=True, num_workers=1)
 
 time.sleep(4)
 
@@ -20,7 +22,7 @@ total_time = 0
 
 start = time.time()
 for i,data in enumerate(trainloader,0):
-    if i==100:
+    if i==2000:
         break
     end = time.time()
     all_times.append(end-start)
@@ -29,9 +31,14 @@ for i,data in enumerate(trainloader,0):
     inputs, labels = data
     start = time.time()
 
-print(total_time-all_times[0])
-plt.plot(all_times[1:])
+print(total_time)
+plt.plot(all_times)
 plt.show()
+f = Path('/home/aarati/workspace/one_access/benchmarks/cifar10/measurements/pytorch.npy').open('wb')
+np.save(f, np.array(all_times))
+f.close()
+
+# 4.015
 
 # Workers
 # 0: 3.906
