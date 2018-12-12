@@ -34,6 +34,7 @@ class CIFAR10(data.Dataset):
 
     """
     base_folder = 'cifar-10-batches-py'
+    ir_folder = 'cifar-10-batches-py/ir'
     url = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
     filename = "cifar-10-python.tar.gz"
     tgz_md5 = 'c58f30108f718f92721af3b95e74349a'
@@ -86,7 +87,7 @@ class CIFAR10(data.Dataset):
             self.train_data = np.concatenate(self.train_data)
             self.train_data = self.train_data.reshape((50000, 3, 32, 32))
             self.train_data = self.train_data.transpose((0, 2, 3, 1))  # convert to HWC
-            self.process_file(self.root)
+            self.process_file(self.root + '/' + self.ir_folder)
         else:
             f = self.test_list[0][0]
             file = os.path.join(self.root, self.base_folder, f)
@@ -113,20 +114,20 @@ class CIFAR10(data.Dataset):
             tuple: (image, target) where target is index of the target class.
         """
         f_index = int(index/10000)
-        file = os.path.join(self.root, self.base_folder, self.train_list[f_index][0])
-        fo = open(file, 'rb')
-        entry = pickle.load(fo, encoding='latin1')
+        # file = os.path.join(self.root, self.ir_folder, self.train_list[f_index][0])
+        # fo = open(file, 'rb')
+        # entry = pickle.load(fo, encoding='latin1')
         if self.train:
-            data = np.load(os.path.join(self.root,str(index - (f_index*10000))))
+            data = np.load(os.path.join(self.root, self.ir_folder, str(index - (f_index*10000))))
             img = data[0]
             target = data[1]
-            img = img.reshape((3, 32, 32))
-            img = img.transpose((1, 2, 0))  # convert to HWC
+            # img = img.reshape((3, 32, 32))
+            # img = img.transpose((1, 2, 0))  # convert to HWC
             # img, target = self.train_data[index], self.train_labels[index]
         else:
-            # img, target = self.test_data[index], self.test_labels[index]
-            img = entry['data'][index - (f_index*10000)]
-            target = entry['labels'][index - (f_index*10000)]
+            img, target = self.test_data[index], self.test_labels[index]
+            # img = entry['data'][index - (f_index*10000)]
+            # target = entry['labels'][index - (f_index*10000)]
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
@@ -191,6 +192,7 @@ class CIFAR10(data.Dataset):
             full_path = path + '/' + str(idx)
             f_train = Path(full_path).open('wb')
             np.save(f_train,np.array([data_point,self.train_labels[idx]]))
+            f_train.close()
 
 
 class CIFAR100(CIFAR10):
