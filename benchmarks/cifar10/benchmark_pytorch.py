@@ -10,7 +10,7 @@ from pathlib import Path
 transform = transforms.Compose([transforms.ToTensor()])
 
 trainset = CIFAR10(root='/home/aarati/datasets', train=True,
-        download=True, transform=transforms.ToTensor())
+        download=False, transform=transforms.ToTensor())
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
         shuffle=True, num_workers=1)
 
