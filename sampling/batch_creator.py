@@ -3,6 +3,7 @@ from time import sleep
 from torch.multiprocessing import Process
 import numpy as np
 import torch
+import random
 import torchvision.transforms as transforms
 
 
@@ -18,7 +19,6 @@ class BatchCreator(Process):
         self.batches = self.ds.batches
         self.is_stop = False
         self.max_batches = self.ds.max_batches
-        self.offset = 0
         self.stop_batch_creator = event
         self.target_transform = self.ds.target_transform
         self.transform = self.ds.transform
@@ -28,6 +28,8 @@ class BatchCreator(Process):
         Keep creating the batches in the background
         """
         cur_sample = None
+        cur_order = None
+        offset = 0
         while not self.stop_batch_creator.is_set():
             if self.batches.full():
                 continue
@@ -38,18 +40,21 @@ class BatchCreator(Process):
                     i = 0
                     if cur_sample is None:
                         cur_sample = sample_queue.get()
+                        cur_order = list(range(len(cur_sample[0])))
+                        random.shuffle(cur_order)
 
                     cur_batch_data = []
                     cur_batch_labels = []
                     while i < self.batch_size:
-                        cur_batch_data.append(cur_sample[0][i+self.offset])
-                        cur_batch_labels.append(cur_sample[1][i+self.offset])
+                        index = cur_order[offset]
+                        cur_batch_data.append(cur_sample[0][index])
+                        cur_batch_labels.append(cur_sample[1][index])
                         i += 1
+                        offset += 1
 
-                    self.offset += i
-                    if self.offset == self.ds.sample_size:
+                    if offset == self.ds.sample_size:
                         cur_sample = None
-                        self.offset = 0
+                        offset = 0
 
                     cur_batch_data = np.array(cur_batch_data)
                     cur_batch_data = torch.from_numpy(cur_batch_data)
