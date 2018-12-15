@@ -13,7 +13,7 @@ ds = Cifar10(
     input_data_folder="/Users/srujith/bigdataproject/one_access/benchmarks/data/cifar-10-batches-py", \
     max_batches=2, batch_size=batch_size, rel_sample_size=rel_sample_size, max_samples=1, transform=transforms.ToTensor())
 ds.initialize()
-dl = DataLoader(ds, epochs=1)
+dl = DataLoader(ds)
 
 total_time = 0
 all_times = []

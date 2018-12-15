@@ -230,7 +230,7 @@ class DataStore():
         # Decide on the number of samples to create at each level of
         # the memory hierarchy. (If there is no SSD, no need to create samples)
         # self.samples refers to the reservoir samples in memory
-        s = SampleCreator(self)
+        s = SampleCreator(self, event=None)
         for sample_queue in self.samples:
             s.create_sample(sample_queue)
         # Record the points already sampled
