@@ -30,7 +30,7 @@ class DataLoader:
         """
          Get the next batch from the queue
         """
-        if self.ds.batches.empty() and self.sc.exitcode:
+        if self.ds.batches.empty() and self.sc.exitcode is not None:
             # Sample creator process has ended and batch creator is waiting on self.ds.samples
             print("Epochs completed, stopping batch creation")
             self.stop_batch_creation()
