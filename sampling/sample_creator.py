@@ -15,7 +15,10 @@ class SampleCreator(Process):
         self.num_train_points = self.ds.num_train_points
         self.sample_size = self.ds.sample_size
         self.epochs = epochs
-        self.sampled = sampled
+        if len(sampled):
+            self.sampled = sampled
+        else:
+            self.sampled = [0] * self.num_train_points
         self.replace = replace
         self.stop_sample_creator = event
 
@@ -30,10 +33,10 @@ class SampleCreator(Process):
                     continue
                 else:
                     self.create_sample(sample_queue)
-                    if len(self.sampled) == self.num_train_points:
+                    if all(self.sampled):
                         epochs_done += 1
                         del self.sampled
-                        self.sampled = []
+                        self.sampled = [0] * self.num_train_points
 
     def create_sample(self, sample_queue):
         points = []
@@ -42,7 +45,7 @@ class SampleCreator(Process):
         # Tracks the index of all points considered for sampling
         j = 0
         while j < self.sample_size and i < self.num_train_points:
-            if not self.replace and i in self.sampled:
+            if not self.replace and self.sampled[i]:
                 i += 1
                 continue
             points.append(i)
@@ -50,7 +53,7 @@ class SampleCreator(Process):
             i += 1
 
         while i < self.num_train_points:
-            if not self.replace and i in self.sampled:
+            if not self.replace and self.sampled[i]:
                 i += 1
                 continue
             p = random.randint(0, j)
@@ -59,7 +62,9 @@ class SampleCreator(Process):
             i += 1
             j += 1
 
-        self.sampled.extend(points)
         reservoir = self.ds.build_reservoir_sample(points)
         sample_queue.put(reservoir)
+        # Loop over sampled after putting the reservoir in the queue
+        for point in points:
+            self.sampled[point] = 1
         del reservoir
