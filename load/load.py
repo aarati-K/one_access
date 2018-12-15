@@ -43,7 +43,7 @@ class DataLoader:
         # Attempt to gracefully terminate the processes
         self.stop_bc.set()
         self.stop_sc.set()
-        time.sleep(2)
+        time.sleep(1)
 
         # Terminate the processes forcefully
         self.bc.terminate()
