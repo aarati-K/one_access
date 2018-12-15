@@ -1,35 +1,20 @@
-from store.cifar10 import Cifar10
-from load.load import DataLoader
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from store.cifar10 import Cifar10
+from load.load import DataLoader
 
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 
-trainset = Cifar10(input_data_folder="../../data/cifar-10-batches-py/")
-train_loader = DataLoader(trainset)
-"""
+trainset = Cifar10(input_data_folder="./cifar-10-batches-py/", transform=transform)
+trainset.initialize()
+trainloader = DataLoader(trainset)
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse',
            'ship', 'truck')
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-
-def imshow(img):
-    img = img / 2 + 0.5  # unnormalize
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-
-images, labels = train_loader.get_next_batch()
-
-imshow(torchvision.utils.make_grid(images))
-
-print(' '.join('%5s' % classes[labels[j]] for j in range(4)))
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -65,9 +50,12 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 for epoch in range(2):  # loop over the dataset multiple times
 
     running_loss = 0.0
-    for i, data in enumerate(trainloader, 0):
+    i = 0
+    while i < trainset.num_train_points:
+        i += 1
+
         # get the inputs
-        inputs, labels = data
+        inputs, labels = trainloader.get_next_batch()
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -86,4 +74,3 @@ for epoch in range(2):  # loop over the dataset multiple times
             running_loss = 0.0
 
 print('Finished Training')
-"""

@@ -1,10 +1,10 @@
-from store.store import DataStore, Metadata, MetadataField
-import pickle
-import os
-import numpy as np
 from pathlib import Path
-from store.memory_hierarchy import StorageAttributes, StorageComponents
 from sampling.sample_creator import SampleCreator
+from store.memory_hierarchy import StorageAttributes, StorageComponents
+from store.store import DataStore, Metadata, MetadataField
+import numpy as np
+import os
+import pickle
 
 
 class Cifar10(DataStore):

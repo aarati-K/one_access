@@ -2,3 +2,6 @@ venv/*
 *__pycache__*
 .idea
 data/*
+cifar-10-batches-py
+cifar-10-python.tar.gz
+.vscode
