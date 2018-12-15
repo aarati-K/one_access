@@ -102,6 +102,8 @@ class DataStore():
         self.sample_size = batch_size*rel_sample_size
         # Samples populated by the SampleCreator process (shared memory)
         self.samples = [Queue(1) for i in range(self.max_samples)]
+        # Record the points sampled in advance, before starting batch creator and sample creator processes
+        self.points_sampled = []
 
         # BATCHING ATTRIBUTES
         self.max_batches = max_batches
@@ -231,6 +233,9 @@ class DataStore():
         s = SampleCreator(self, event=None)
         for sample_queue in self.samples:
             s.create_sample(sample_queue)
+        # Record the points already sampled
+        # NOTE: performing sampling without replacement by default
+        self.points_sampled = s.sampled
 
     def initialize(self):
         """

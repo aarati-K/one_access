@@ -45,14 +45,14 @@ class BatchCreator(Process):
 
                     cur_batch_data = []
                     cur_batch_labels = []
-                    while i < self.batch_size:
+                    while i < self.batch_size and offset < len(cur_sample[0]):
                         index = cur_order[offset]
                         cur_batch_data.append(cur_sample[0][index])
                         cur_batch_labels.append(cur_sample[1][index])
                         i += 1
                         offset += 1
 
-                    if offset == self.ds.sample_size:
+                    if offset == len(cur_sample[0]):
                         cur_sample = None
                         offset = 0
 

@@ -17,11 +17,16 @@ dl = DataLoader(ds)
 
 total_time = 0
 all_times = []
+
+# while True:
 for i in range(2000):
     # if (i % 10 == 0):
     #     print(i)
     start = time.time()
-    d, l = dl.get_next_batch()
+    try:
+        d, l = dl.get_next_batch()
+    except:
+        break
     end = time.time()
     total_time += (end - start)
     all_times.append(end - start)
