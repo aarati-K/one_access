@@ -104,12 +104,16 @@ class DataStore():
         self.samples = [Queue(1) for i in range(self.max_samples)]
         # Record the points sampled in advance, before starting batch creator and sample creator processes
         self.points_sampled = []
+        # Queue to communicate that sample creator is done
+        self.sample_creator_done = Queue(1)
 
         # BATCHING ATTRIBUTES
         self.max_batches = max_batches
         self.batch_size = batch_size
         # batches populated by the BatchCreator process (shared memory)
         self.batches = Queue(self.max_batches)
+        # Queue to communicate that batch creation is done
+        self.batch_creator_done = Queue(1)
 
     def count_num_points(self):
         # Use this implementation for default format of subfolder classes

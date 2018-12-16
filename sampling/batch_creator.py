@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import random
 import torchvision.transforms as transforms
+import time
 
 
 class BatchCreator(Process):
@@ -16,7 +17,6 @@ class BatchCreator(Process):
         super(BatchCreator, self).__init__()
         self.ds = data_store
         self.batch_size = self.ds.batch_size
-        self.batches = self.ds.batches
         self.is_stop = False
         self.max_batches = self.ds.max_batches
         self.stop_batch_creator = event
@@ -31,7 +31,7 @@ class BatchCreator(Process):
         cur_order = None
         offset = 0
         while not self.stop_batch_creator.is_set():
-            if self.batches.full():
+            if self.ds.batches.full():
                 continue
             for sample_queue in self.ds.samples:
                 if cur_sample is None and sample_queue.empty():
@@ -52,12 +52,9 @@ class BatchCreator(Process):
                         i += 1
                         offset += 1
 
-                    if offset == len(cur_sample[0]):
-                        cur_sample = None
-                        offset = 0
-
                     cur_batch_data = np.array(cur_batch_data)
                     cur_batch_data = torch.from_numpy(cur_batch_data)
+
                     if self.transform:
                         cur_batch_data_ = []
                         for img_tensor in cur_batch_data:
@@ -75,5 +72,22 @@ class BatchCreator(Process):
                             img = self.target_transform(img)
                             cur_batch_labels_.append(img)
                         cur_batch_labels = torch.stack(cur_batch_labels_)
-                        
-                    self.batches.put((cur_batch_data, cur_batch_labels))
+
+                    self.ds.batches.put((cur_batch_data, cur_batch_labels))
+
+                    if offset == len(cur_sample[0]):
+                        cur_sample = None
+                        offset = 0
+                        # Check if sample creator has finished running
+                        if self.ds.sample_creator_done.full():
+                            # Wait on batches to become empty
+                            while not self.ds.batches.empty():
+                                continue
+
+                            # Mark the batch creator as done
+                            self.ds.batch_creator_done.put(1)
+
+                            # Allow some time to copy over the batch
+                            time.sleep(2)
+
+                            return

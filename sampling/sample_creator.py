@@ -1,5 +1,6 @@
 from torch.multiprocessing import Process
 import random
+import time
 
 
 class SampleCreator(Process):
@@ -37,6 +38,17 @@ class SampleCreator(Process):
                         epochs_done += 1
                         del self.sampled
                         self.sampled = [0] * self.num_train_points
+
+        # Make sure that all the samples have been taken by the batch creator
+        for sample_queue in self.ds.samples:
+            while sample_queue.full():
+                continue
+
+        # Insert a number into sample_creator_done queue to mark completion
+        self.ds.sample_creator_done.put(1)
+
+        # Allow some time to copy over the sample
+        time.sleep(2)
 
     def create_sample(self, sample_queue):
         points = []
