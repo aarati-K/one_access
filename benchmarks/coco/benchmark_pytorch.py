@@ -15,7 +15,7 @@ trainset = torchvision.datasets.CocoDetection(root="/home/aarati/datasets/coco/t
                 annFile="/home/aarati/datasets/coco/annotations/instances_train2017.json", \
                 transform=transform)
 
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, num_workers=1)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, num_workers=1, shuffle=True)
 
 i = 0
 total_time = 0
@@ -30,4 +30,4 @@ while True:
     i += 1
 
 print(total_time)
-# Total time: 197107.41146445274
+# Total time: 199376.85344719887
