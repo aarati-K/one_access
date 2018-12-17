@@ -87,7 +87,12 @@ class CIFAR10(data.Dataset):
             self.train_data = np.concatenate(self.train_data)
             self.train_data = self.train_data.reshape((50000, 3, 32, 32))
             self.train_data = self.train_data.transpose((0, 2, 3, 1))  # convert to HWC
-            self.process_file(self.root + '/' + self.ir_folder)
+            ir_folder = self.root + '/' + self.ir_folder
+            try:
+                os.mkdir(ir_folder)
+            except Exception as e:
+                print("Failed creating ir folder. Error: ", e)
+            self.process_file(ir_folder)
         else:
             f = self.test_list[0][0]
             file = os.path.join(self.root, self.base_folder, f)

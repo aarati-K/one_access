@@ -75,7 +75,7 @@ def test(args, model):
         [transforms.ToTensor(),
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     test_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10('~/datasets', train=False, transform=transform),
+        datasets.CIFAR10('~/datasets', train=False, transform=transform, download=True),
         batch_size=args.batch_size, shuffle=True, num_workers=1)
 
     test_epoch(model, test_loader, criterion)

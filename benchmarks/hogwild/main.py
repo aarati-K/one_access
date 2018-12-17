@@ -74,7 +74,7 @@ if __name__ == '__main__':
     start = time.time()
     if args.loader == ONE_ACCESS:
         data_store = Cifar10(
-            input_data_folder="~/datasets", \
+            input_data_folder="~/datasets/cifar-10-batches-py", \
             max_batches=4, batch_size=args.batch_size, \
             rel_sample_size=args.rel_sample_size, max_samples=1, \
             transform=transform)
