@@ -73,6 +73,7 @@ if __name__ == '__main__':
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     start = time.time()
     if args.loader == ONE_ACCESS:
+        # NOTE: pass the correct input data folder (preferably full path) with dataset already downloaded
         data_store = Cifar10(
             input_data_folder="~/datasets/cifar-10-batches-py", \
             max_batches=4, batch_size=args.batch_size, \
