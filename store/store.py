@@ -67,7 +67,7 @@ class DataStore():
     TEST_FOLDER = "test"
     DATA_FILE = "data_{}.npy"
 
-    def __init__(self, input_data_folder, max_batches=1, batch_size=1, max_samples=1,
+    def __init__(self, input_data_folder="", max_batches=1, batch_size=1, max_samples=1,
         rel_sample_size=10, transform=None, target_transform=None, delete_existing=False):
         # To be assigned by the derived class
         self.dataset_name = ""
@@ -245,6 +245,6 @@ class DataStore():
         """
           Calls generateIR and generateSamples
         """
-        self.generate_IR()
         self.count_num_points()
+        self.generate_IR()
         self.initialize_samples()
