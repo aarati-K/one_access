@@ -20,7 +20,7 @@ PYTORCH = 2
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 parser.add_argument('--batch-size', type=int, default=32, metavar='N',
                     help='input batch size for training (default: 32)')
-parser.add_argument('--rel-sample-size', type=int, default=500, metavar='N',
+parser.add_argument('--rel-sample-size', type=int, default=400, metavar='N',
                     help="relative sample size for sample creator (default: 500)")
 parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                     help='input batch size for testing (default: 1000)')
@@ -36,7 +36,7 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
 parser.add_argument('--num-processes', type=int, default=2, metavar='N',
                     help='how many training processes to use (default: 2)')
-parser.add_argument('--loader', type=int, default=ONE_ACCESS,
+parser.add_argument('--loader', type=int, default=2,
                     help='Which data loader to use')
 
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     start = time.time()
     if args.loader == ONE_ACCESS:
         data_store = Cifar10(
-            input_data_folder="~/datasets/cifar-10-batches-py", \
+            input_data_folder="/Users/srujith/datasets/cifar-10-batches-py", \
             max_batches=4, batch_size=args.batch_size, \
             rel_sample_size=args.rel_sample_size, max_samples=1, \
             transform=transform)
