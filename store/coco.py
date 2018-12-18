@@ -25,6 +25,7 @@ class CocoDetection(DataStore):
 
         self.coco = COCO(annFile)
         self.ids = list(self.coco.imgs.keys())
+        self.ids.sort()
         # Tentative number of files, might change
         self.num_train_files = 10
         self.num_points_in_numpy_batch = 10
