@@ -85,6 +85,9 @@ class CocoDetection(DataStore):
         if len(batches_in_files) != self.num_train_files:
             self.num_train_files = len(batches_in_files)
 
+        # Write metadata before creating files
+        self.write_metadata(batches_in_files)
+
         for i in range(len(batches_in_files)):
             fname = train_folder_path + '/' + self.DATA_FILE.format(i)
             f = Path(fname).open('ab')
@@ -94,8 +97,6 @@ class CocoDetection(DataStore):
                 nparr = np.array(nparr)
                 np.save(f, nparr)
             f.close()
-
-        self.write_metadata(batches_in_files)
 
     def get_image(self, index):
         """
