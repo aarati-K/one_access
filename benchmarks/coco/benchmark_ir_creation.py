@@ -10,3 +10,4 @@ print(ds.num_train_points)
 ds.generate_IR()
 end = time.time()
 print("Total time", end-start)
+# Total time: 1382 secs ~ 23 mins
