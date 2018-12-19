@@ -67,7 +67,7 @@ class DataStore():
     TEST_FOLDER = "test"
     DATA_FILE = "data_{}.npy"
 
-    def __init__(self, input_data_folder, max_batches=1, batch_size=1, max_samples=1,
+    def __init__(self, input_data_folder="", max_batches=1, batch_size=1, max_samples=1,
         rel_sample_size=10, transform=None, target_transform=None, delete_existing=False):
         # To be assigned by the derived class
         self.dataset_name = ""
@@ -175,7 +175,7 @@ class DataStore():
             if point >= cur_file_max_index:
                 # Save the cur files points to the map
                 points_in_file = map(lambda point: point-cur_file_min_index, points_from_cur_file)
-                file_to_points_map[cur_data_file_path] = points_in_file
+                file_to_points_map[cur_data_file_path] = list(points_in_file)
 
                 # Find the next file
                 points_from_cur_file = []
@@ -191,7 +191,7 @@ class DataStore():
 
         # Entry for the last file
         points_in_file = map(lambda point: point-cur_file_min_index, points_from_cur_file)
-        file_to_points_map[cur_data_file_path] = points_in_file
+        file_to_points_map[cur_data_file_path] = list(points_in_file)
         # Iterate over all the files
         for filename in file_to_points_map.keys():
             points_in_file = file_to_points_map[filename]
@@ -245,6 +245,6 @@ class DataStore():
         """
           Calls generateIR and generateSamples
         """
-        self.generate_IR()
         self.count_num_points()
+        self.generate_IR()
         self.initialize_samples()
