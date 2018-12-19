@@ -68,10 +68,13 @@ class BatchCreator(Process):
                     if self.target_transform:
                         cur_batch_labels_ = []
                         for img_tensor in cur_batch_labels:
-                            img = transforms.ToPILImage()(img_tensor)
-                            img = self.target_transform(img)
+                            img = self.target_transform(img_tensor)
                             cur_batch_labels_.append(img)
-                        cur_batch_labels = torch.stack(cur_batch_labels_)
+                        try:
+                            cur_batch_labels = torch.stack(cur_batch_labels_)
+                        except:
+                            # HACK
+                            cur_batch_labels = cur_batch_labels_
 
                     self.ds.batches.put((cur_batch_data, cur_batch_labels))
 
