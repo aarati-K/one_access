@@ -28,7 +28,7 @@ class CocoDetection(DataStore):
         self.ids.sort()
         # Tentative number of files, might change
         self.num_train_files = 10
-        self.num_points_in_numpy_batch = 10
+        self.num_points_in_numpy_batch = 500
 
     def count_num_points(self):
         self.num_train_points = len(self.ids)
@@ -97,6 +97,7 @@ class CocoDetection(DataStore):
                 nparr = np.array(nparr)
                 np.save(f, nparr)
             f.close()
+            print("Finished creating file ", fname)
 
     def get_image(self, index):
         """
