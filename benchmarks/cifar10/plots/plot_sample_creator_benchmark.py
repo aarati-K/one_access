@@ -23,12 +23,8 @@ bplot = ax.boxplot(
 ax.set_title('Cifar-10 Sample Creation Times', fontsize=18)
 
 # fill with colors
-"""
-colors = ['lightblue', 'lightblue', 'lightblue']
-
-for patch, color in zip(bplot['boxes'], colors):
-    patch.set_facecolor(color)
-"""
+for patch in bplot['boxes']:
+    patch.set(facecolor='lightblue')
 
 # adding horizontal grid lines
 ax.yaxis.grid(True)
