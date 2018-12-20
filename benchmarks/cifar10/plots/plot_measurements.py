@@ -10,6 +10,12 @@ one_access_1000 = np.load(
 pt = np.load(Path("../measurements/pytorch.npy").open('rb'))
 
 fig, ax = plt.subplots()
+fig.set_figheight(5)
+fig.set_figwidth(7)
+
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+
 line, = ax.plot(one_access_500, color='blue', lw=2)
 line, = ax.plot(one_access_1000, color='lightblue', lw=2)
 line, = ax.plot(pt, color='red', lw=2)

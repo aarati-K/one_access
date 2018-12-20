@@ -9,6 +9,12 @@ ss10000 = [
 ]
 
 fig, ax = plt.subplots()
+fig.set_figheight(5)
+fig.set_figwidth(7)
+
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+
 bplot = ax.boxplot(
     [ss1, ss10, ss100, ss1000, ss10000],
     vert=True,  # vertical box alignment
@@ -17,14 +23,16 @@ bplot = ax.boxplot(
 ax.set_title('Cifar-10 Sample Creation Times', fontsize=18)
 
 # fill with colors
-colors = ['pink', 'lightblue', 'lightgreen']
+"""
+colors = ['lightblue', 'lightblue', 'lightblue']
 
 for patch, color in zip(bplot['boxes'], colors):
     patch.set_facecolor(color)
+"""
 
 # adding horizontal grid lines
 ax.yaxis.grid(True)
 ax.set_xlabel('Sample Size', fontsize=18)
 ax.set_ylabel('Sample Creation Time (s)', fontsize=18)
 
-plt.savefig("sample_creator_benchmark.png")
+plt.savefig("cifar10_sample_creation.png")
