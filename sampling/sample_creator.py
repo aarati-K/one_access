@@ -22,6 +22,7 @@ class SampleCreator(Process):
             self.sampled = [0] * self.num_train_points
         self.replace = replace
         self.stop_sample_creator = event
+        self.total_sample_creation_time = 0
 
     def run(self):
         """
@@ -47,10 +48,13 @@ class SampleCreator(Process):
         # Insert a number into sample_creator_done queue to mark completion
         self.ds.sample_creator_done.put(1)
 
+        print("Total I/O time in sample creator: ", self.total_sample_creation_time)
+
         # Allow some time to copy over the sample
         time.sleep(2)
 
     def create_sample(self, sample_queue):
+        start = time.time()
         points = []
         # Tracks the index of all points
         i = 0
@@ -75,6 +79,8 @@ class SampleCreator(Process):
             j += 1
 
         reservoir = self.ds.build_reservoir_sample(points)
+        end = time.time()
+        self.total_sample_creation_time += (end-start)
         sample_queue.put(reservoir)
         # Loop over sampled after putting the reservoir in the queue
         for point in points:

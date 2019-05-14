@@ -22,6 +22,7 @@ class BatchCreator(Process):
         self.stop_batch_creator = event
         self.target_transform = self.ds.target_transform
         self.transform = self.ds.transform
+        self.put_once = 0
 
     def run(self):
         """
@@ -33,6 +34,25 @@ class BatchCreator(Process):
         while not self.stop_batch_creator.is_set():
             if self.ds.batches.full():
                 continue
+            elif self.put_once:
+                self.put_once = 0
+                self.ds.batches.put((cur_batch_data, cur_batch_labels))
+                 # Check if sample creator has finished running
+                if self.ds.sample_creator_done.full():
+                    # Wait on batches to become empty
+                    while not self.ds.batches.empty():
+                        continue
+
+                    # Mark the batch creator as done
+                    self.ds.batch_creator_done.put(1)
+
+                    # Allow some time to copy over the batch
+                    time.sleep(2)
+
+                    return
+                # else continue
+                continue
+
             for sample_queue in self.ds.samples:
                 if cur_sample is None and sample_queue.empty():
                     continue
@@ -77,6 +97,7 @@ class BatchCreator(Process):
                             cur_batch_labels = cur_batch_labels_
 
                     self.ds.batches.put((cur_batch_data, cur_batch_labels))
+                    self.put_once = 1
 
                     if offset == len(cur_sample[0]):
                         cur_sample = None
