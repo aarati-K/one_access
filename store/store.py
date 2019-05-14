@@ -239,6 +239,7 @@ class DataStore():
             s.create_sample(sample_queue)
         # Record the points already sampled
         # NOTE: performing sampling without replacement by default
+        print("Sample creation time in initialize: ", s.total_sample_creation_time)
         self.points_sampled = s.sampled
 
     def initialize(self):

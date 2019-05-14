@@ -93,7 +93,7 @@ class CocoDetection(DataStore):
             f = Path(fname).open('ab')
             for batch in batches_in_files[i]:
                 # create a batch
-                nparr = [[np.array(self.get_image(i)), self.ids[i]] for i in batch]
+                nparr = [[self.get_image(i), self.ids[i]] for i in batch]
                 nparr = np.array(nparr)
                 np.save(f, nparr)
             f.close()
@@ -109,6 +109,8 @@ class CocoDetection(DataStore):
         img = Image.open(os.path.join(self.input_data_folder, path)).convert('RGB')
         # NOTE:Crop the image. Hardcoded for now.
         img = transforms.RandomResizedCrop(224)(img)
+        img = np.array(img)
+        img = img.reshape(3, 224, 224)
         return img
 
     def write_metadata(self, batches_in_files):
